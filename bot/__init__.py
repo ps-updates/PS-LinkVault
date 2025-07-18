@@ -58,6 +58,7 @@ class Bot(Client):
             sys.exit()
 
         print(ascii_art)
+        await asyncio.sleep(1.5)
         self.log(__name__).info(f"Bot Running..!\n\nCreated by \nhttps://t.me/ps_updates")
         print("""Welcome to File Sharing Bot""")
 
