@@ -8,11 +8,11 @@ class Config(object):
     API_HASH = getenv("API_HASH", "")
     BOT_TOKEN = getenv("BOT_TOKEN", "")
     BOT_WORKERS = int(getenv("BOT_WORKERS", "4"))
-
+    
     # Webhook settings
     WEB_MODE = getenv("WEB_MODE", "False").lower() in ("true", "1", "yes")
     PORT = int(getenv("PORT", "8080"))  # default port for web services
-
+    
     CHANNEL_ID = int(getenv("CHANNEL_ID", ""))
     OWNER_ID = int(getenv("OWNER_ID", ""))
 
@@ -26,8 +26,8 @@ class Config(object):
 
     # Messages
     START_PIC = getenv("START_PIC", "")
-    START_MSG = getenv("START_MESSAGE", "Hello {first}\n\nI can store private files in a specified channel and other users can access them from special links.")
-    FORCE_MSG = getenv("FORCE_SUB_MESSAGE", "Hello {first}\n\n<b>You need to join our channel before using the bot.</b>")
+    START_MSG = getenv("START_MESSAGE", "👋 Hello {mention},\n\nThis bot helps you store private files in a secure channel and generate special access links for sharing. 🔐📁\n\nOnly admins can upload files and generate links. Just send the file here to get started.")
+    FORCE_MSG = getenv("FORCE_SUB_MESSAGE", "👋 Hello {mention},\n\n<b>You need to join our updates channel before using this bot.</b>\n\n📢 Please join the required channel, then try again.")
     CUSTOM_CAPTION = getenv("CUSTOM_CAPTION", None)
 
     # ✅ Secure ADMINS (only numeric IDs)
