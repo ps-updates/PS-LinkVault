@@ -5,3 +5,4 @@ motor
 dnspython
 aiohttp
 uvloop
+shortzy

@@ -7,8 +7,8 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait
 
 from info import Config
-from bot.utils import is_subscribed, handle_force_sub, decode, get_messages, schedule_auto_delete
-from bot.database import add_user, present_user
+from bot.utils import is_subscribed, handle_force_sub, decode, get_messages, schedule_auto_delete, get_readable_time
+from bot.database import add_user, present_user, is_verified, validate_token_and_verify
 
 # ──────────────────────────────────────────────────────────────
 
@@ -23,9 +23,26 @@ async def start_handler(client: Client, message: Message):
         return await handle_force_sub(client, message)
 
     if len(message.command) > 1:
+        param = message.command[1]
+
+        # ✅ New style verification: /start verify-USERID-TOKEN
+        if param.startswith("verify-"):
+            parts = param.split("-", 2)
+            if len(parts) == 3:
+                _, uid, token = parts
+                if str(uid) != str(user_id):
+                    return await message.reply("❌ Invalid or expired link!")
+                verified = await validate_token_and_verify(user_id, token, Config.TOKEN_EXPIRE)
+                if verified:
+                    return await message.reply("✅ You’ve been verified successfully!")
+                else:
+                    return await message.reply("❌ Invalid or expired token. Please use /token to generate a new one.")
+            else:
+                return await message.reply("❌ Malformed verification link.")
+
+        # 🔐 Existing deep link decoder
         try:
-            encoded = message.command[1]
-            decoded = decode(encoded)
+            decoded = decode(param)
             parts = decoded.split("-")
         except Exception:
             return
@@ -42,17 +59,24 @@ async def start_handler(client: Client, message: Message):
         except Exception:
             return
 
-        wait_msg = await message.reply("Processing Please wait...")
+        # ✅ Check verification only if required
+        if Config.VERIFY_MODE and (user_id not in Config.ADMINS or user_id != Config.OWNER_ID):
+            if not await is_verified(user_id):
+                return await message.reply_text(
+                    f"🔐 You're not verified!\nPlease verify yourself first using /token.",
+                    disable_web_page_preview=True
+                )
+
+        wait_msg = await message.reply("Processing... Please wait.")
 
         try:
             messages = await get_messages(client, ids)
         except Exception:
-            return await wait_msg.edit("❌ Something went wrong while fetching messages!")
+            return await wait_msg.edit("❌ Error while fetching messages!")
 
         await wait_msg.delete()
 
         to_delete = []
-
         for msg in messages:
             caption = ""
             if Config.CUSTOM_CAPTION and msg.document:
@@ -82,10 +106,11 @@ async def start_handler(client: Client, message: Message):
                 client.log(__name__).info(f"Copy error: {e}")
 
         if to_delete:
-            note = await client.send_message(user_id, Config.AUTO_DELETE_MSG.format(time=Config.AUTO_DELETE_TIME))
+            note = await client.send_message(user_id, Config.AUTO_DELETE_MSG.format(time=get_readable_time(Config.AUTO_DELETE_TIME)))
             asyncio.create_task(schedule_auto_delete(to_delete, client, note))
 
     else:
+        # Start Message / No Params
         buttons = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton("😊 About Me", callback_data="about"),
@@ -104,5 +129,3 @@ async def start_handler(client: Client, message: Message):
             await message.reply_photo(photo=Config.START_PIC, caption=caption, reply_markup=buttons, quote=True)
         else:
             await message.reply_text(text=caption, reply_markup=buttons, disable_web_page_preview=True, quote=True)
-
-# ──────────────────────────────────────────────────────────────

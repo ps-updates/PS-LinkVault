@@ -10,7 +10,11 @@ A fast and secure Telegram bot to **share private files via unique access links*
 - 🚫 Force Subscription before file access  
 - 📊 Admin stats & full broadcast system  
 - ⚡ Fast MongoDB (async) database  
-- 🔐 Optional content protection & auto-delete  
+- 🔐 Optional content protection & auto-delete
+- ✅ **Token Verification**
+  - Token-based access for private file downloads
+  - Verification expires after a set time (`TOKEN_EXPIRE`)
+  - Enable by setting `VERIFY_MODE=True` in `.env`
 - 🌍 Web Mode support (Koyeb)  
 - 🧩 Easy plugin-based structure  
 
@@ -78,6 +82,12 @@ I can store private files and generate shareable links.
 FORCE_SUB_MESSAGE=You must join our channel before accessing files.
 CUSTOM_CAPTION=None
 
+VERIFY_MODE=True                # Enable/disable token system
+TOKEN_EXPIRE=21600               # Expiry time in seconds (default: 21600 = 6 Hours)
+SHORTLINK_API=your_api_key     # (Optional) If using shortlink-based ad tasks
+SHORTLINK_URL=xyz.io   # (Optional) Shortener base URL add without https:// or http://
+TUTORIAL=https://youtu.be/abc123  # Optional tutorial for users
+
 # Optional
 PROTECT_CONTENT=False
 DISABLE_CHANNEL_BUTTON=True
@@ -108,7 +118,8 @@ python3 main.py
 /users         - Get user count  
 /broadcast     - Broadcast message  
 /genlink       - Generate a file link  
-/batch         - Send files in batch mode  
+/batch         - Send files in batch mode
+/token         - for generating tokens 
 ```
 
 ---
