@@ -38,12 +38,12 @@ async def is_verified(user_id: int) -> bool:
         return False
     return True
 
-async def validate_token_and_verify(user_id: int, token: str) -> bool:
+async def validate_token_and_verify(user_id: int, token: str, expire_seconds: int) -> bool:
     record = await tokens_col.find_one({"token": token})
     if not record or record["used"] or record["user_id"] != user_id:
         return False
     if datetime.utcnow() > record["expires_at"]:
         return False
     await tokens_col.update_one({"_id": record["_id"]}, {"$set": {"used": True}})
-    await set_verified(user_id)
+    await set_verified(user_id, expire_seconds)
     return True
