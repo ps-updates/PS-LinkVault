@@ -41,8 +41,15 @@ class Config(object):
     DISABLE_CHANNEL_BUTTON = getenv("DISABLE_CHANNEL_BUTTON", "False") == "True"
 
     AUTO_DELETE_TIME = int(getenv("AUTO_DELETE_TIME", "0"))
-    AUTO_DELETE_MSG = getenv("AUTO_DELETE_MSG", "This file will be automatically deleted in {time} seconds.")
+    AUTO_DELETE_MSG = getenv("AUTO_DELETE_MSG", "This file will be automatically deleted in {time}.")
     AUTO_DEL_SUCCESS_MSG = getenv("AUTO_DEL_SUCCESS_MSG", "✅ File deleted successfully.")
+
+    # Token Verification (Shortlink)
+    VERIFY_MODE = getenv("VERIFY_MODE", "True").lower() in ("true", "1", "yes")
+    SHORTLINK_API = getenv("SHORTLINK_API", "")
+    SHORTLINK_URL = getenv("SHORTLINK_URL", "")
+    TOKEN_EXPIRE = int(getenv("TOKEN_EXPIRE", "21600"))  # default: 6 hours
+    TUTORIAL = getenv("TUTORIAL", "https://t.me/shareus_open_tutorial/12")
 
     BOT_STATS_TEXT = "<b>BOT UPTIME</b>\n{uptime}"
     USER_REPLY_TEXT = "❌ I'm a bot — please don't DM me!"
