@@ -8,7 +8,7 @@ from bot.utils import get_readable_time
 async def stats(bot: Client, message: Message):
     now = datetime.now()
     delta = now - bot.uptime
-    time = get_readable_time(delta.seconds)
+    time = get_readable_time(delta.seconds, long=True)
     await message.reply(Config.BOT_STATS_TEXT.format(uptime=time))
 
 '''
