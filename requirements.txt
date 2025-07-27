@@ -2,6 +2,7 @@ pyrofork==2.3.45
 TgCrypto
 python-dotenv
 motor
+apscheduler
 dnspython
 aiohttp
 uvloop
