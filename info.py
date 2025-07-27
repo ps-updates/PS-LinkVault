@@ -1,7 +1,10 @@
+import re
 from os import getenv
 from dotenv import load_dotenv
 
 load_dotenv()
+
+id_pattern = re.compile(r'^.\d+$')
 
 class Config(object):
     API_ID = int(getenv("API_ID", "0"))
@@ -21,7 +24,8 @@ class Config(object):
     DATABASE_NAME = getenv("DATABASE_NAME", "Cluster0")
 
     # Force subscription
-    FORCE_SUB_CHANNEL = int(getenv("FORCE_SUB_CHANNEL", "0"))
+    #FORCE_SUB_CHANNEL = int(getenv("FORCE_SUB_CHANNEL", "0"))   
+    FORCE_SUB_CHANNEL = list(set(int(ch) for ch in getenv("FORCE_SUB_CHANNEL", "").split() if id_pattern.fullmatch(ch)))
     JOIN_REQUEST_ENABLE = getenv("JOIN_REQUEST_ENABLED", None)
 
     # Messages

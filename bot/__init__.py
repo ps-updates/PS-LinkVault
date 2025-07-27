@@ -3,6 +3,7 @@ from datetime import datetime
 from pyrogram import Client
 from logger import LOGGER
 from info import Config
+from bot.utils import schedule_manager
 
 ascii_art = """
 ████████╗██╗░░██╗███████╗  ██████╗░░██████╗  ██████╗░░█████╗░████████╗░██████╗
@@ -23,7 +24,7 @@ class Bot(Client):
             workers=Config.BOT_WORKERS,
             bot_token=Config.BOT_TOKEN
         )
-
+        
         self.log = LOGGER
 
     async def start(self):
@@ -31,21 +32,30 @@ class Bot(Client):
         me = await self.get_me()
         self.username = me.username
         self.mention = me.mention
-        self.uptime = datetime.now()
-
-        if Config.FORCE_SUB_CHANNEL:
+        self.uptime = datetime.now()             
+        self.channel_info = {}
+        
+        for channel_id in Config.FORCE_SUB_CHANNEL:
             try:
-                link = (await self.get_chat(Config.FORCE_SUB_CHANNEL)).invite_link
+                chat = await self.get_chat(channel_id)
+                title = chat.title
+                link = chat.invite_link
+        
                 if not link:
-                    await self.export_chat_invite_link(Config.FORCE_SUB_CHANNEL)
-                    link = (await self.get_chat(Config.FORCE_SUB_CHANNEL)).invite_link
-                self.invitelink = link
-            except Exception as a:
-                self.log(__name__).warning(a)
-                self.log(__name__).warning("Bot can't Export Invite link from Force Sub Channel!")
-                self.log(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {Config.FORCE_SUB_CHANNEL}")
-                self.log(__name__).info("\nBot Stopped. Join https://t.me/ps_discuss for support")
+                    await self.export_chat_invite_link(channel_id)
+                    chat = await self.get_chat(channel_id)
+                    link = chat.invite_link
+        
+                self.channel_info[channel_id] = {
+                    "title": title,
+                    "invite_link": link
+                }
+        
+            except Exception as e:
+                self.log(__name__).warning(e)
+                self.log(__name__).warning("Error with Force Sub channel.")
                 sys.exit()
+        
         try:
             db_channel = await self.get_chat(Config.CHANNEL_ID)
             self.db_channel = db_channel
@@ -62,10 +72,13 @@ class Bot(Client):
         self.log(__name__).info(f"Bot Running..!\n\nCreated by \nhttps://t.me/ps_updates")
         print("""Welcome to File Sharing Bot""")
 
+        await schedule_manager.start()
+        asyncio.create_task(schedule_manager.restore_pending_deletes(self))
+        
         if Config.WEB_MODE:
             from web import start_webserver
             asyncio.create_task(start_webserver(self, Config.PORT))
-
+       
     async def stop(self, *args):
         await super().stop()
         self.log(__name__).info("Bot stopped.")
