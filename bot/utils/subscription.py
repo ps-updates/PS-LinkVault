@@ -13,9 +13,6 @@ async def handle_force_sub(client, message: Message):
 
     # Use preloaded channel info from client.channels_info
     for ch in Config.FORCE_SUB_CHANNEL:
-        info = client.channel_info.get(ch)
-        title = info.get("title", "Channel") if info else "Channel"
-
         try:
             member = await client.get_chat_member(ch, user.id)
             if member.status in (
@@ -29,11 +26,9 @@ async def handle_force_sub(client, message: Message):
         except Exception:
             not_joined.append(ch)
 
-    # If user joined all channels, no need to prompt
     if not not_joined:
         return False
 
-    # Create join buttons using preloaded invite links
     for ch in not_joined:
         info = client.channel_info.get(ch)
         if not info:
@@ -61,7 +56,6 @@ async def handle_force_sub(client, message: Message):
         else:
             joined_txt += f"❌ <b>{title}</b>\n"
 
-    # Format FSUB message
     fsub_msg = Config.FORCE_MSG.format(
         first=user.first_name,
         last=user.last_name,
@@ -69,8 +63,7 @@ async def handle_force_sub(client, message: Message):
         mention=user.mention,
         id=user.id
     )
-
-    # Send final FSUB reply
+    
     await message.reply(
         f"{fsub_msg}\n\n<b>Channel Join Status:</b>\n{joined_txt}",
         reply_markup=InlineKeyboardMarkup(buttons),
