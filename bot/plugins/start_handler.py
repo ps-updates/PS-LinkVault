@@ -7,7 +7,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait
 
 from info import Config
-from bot.utils import is_subscribed, handle_force_sub, decode, get_messages, schedule_auto_delete, get_readable_time
+from bot.utils import handle_force_sub, decode, get_messages, get_readable_time, schedule_manager
 from bot.database import add_user, present_user, is_verified, validate_token_and_verify
 
 # ──────────────────────────────────────────────────────────────
@@ -19,8 +19,8 @@ async def start_handler(client: Client, message: Message):
     if not await present_user(user_id):
         await add_user(user_id)
 
-    if not await is_subscribed(client, user_id):
-        return await handle_force_sub(client, message)
+    if await handle_force_sub(client, message):
+        return
 
     if len(message.command) > 1:
         param = message.command[1]
@@ -106,9 +106,20 @@ async def start_handler(client: Client, message: Message):
                 client.log(__name__).info(f"Copy error: {e}")
 
         if to_delete:
-            note = await client.send_message(user_id, Config.AUTO_DELETE_MSG.format(time=get_readable_time(Config.AUTO_DELETE_TIME)))
-            asyncio.create_task(schedule_auto_delete(to_delete, client, note))
-
+            files_to_delete = [msg.id for msg in to_delete]
+            delete_at = Config.AUTO_DELETE_TIME
+            
+            warning = await client.send_message(user_id, Config.AUTO_DELETE_MSG.format(time=get_readable_time(Config.AUTO_DELETE_TIME)))
+            if warning:
+                files_to_delete.append(warning.id)
+                
+            await schedule_manager.schedule_delete(
+                client=client,
+                chat_id=message.chat.id,
+                message_ids=files_to_delete,
+                delete_n_seconds=delete_at,
+                base64_file_link=param,        
+            )
     else:
         # Start Message / No Params
         buttons = InlineKeyboardMarkup([
