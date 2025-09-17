@@ -7,7 +7,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait
 
 from info import Config
-from bot.utils import handle_force_sub, decode, get_messages, get_readable_time, schedule_manager
+from bot.utils import handle_force_sub, check_force_request, decode, get_messages, get_readable_time, schedule_manager
 from bot.database import add_user, present_user, is_verified, validate_token_and_verify
 
 # ──────────────────────────────────────────────────────────────
@@ -19,8 +19,12 @@ async def start_handler(client: Client, message: Message):
     if not await present_user(user_id):
         await add_user(user_id)
 
-    if await handle_force_sub(client, message):
-        return
+    if Config.JOIN_REQUEST_ENABLE:
+        if not await check_force_request(client, message, expire_seconds=600):
+            return
+    else:
+        if not await handle_force_sub(client, message):
+            return
 
     if len(message.command) > 1:
         param = message.command[1]
