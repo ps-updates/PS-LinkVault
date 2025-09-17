@@ -7,7 +7,8 @@ A fast and secure Telegram bot to **share private files via unique access links*
 ## ✨ Features
 
 - 🔗 Share files using special download links  
-- 🚫 Force Subscription before file access  
+- 🚫 Force Subscription before file access
+- 📝 Request-to-Join support Added
 - 📊 Admin stats & full broadcast system  
 - ⚡ Fast MongoDB (async) database  
 - 🔐 Optional content protection & auto-delete
