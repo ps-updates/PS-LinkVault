@@ -1,0 +1,118 @@
+{
+  "name": "PS LinkVault",
+  "description": "A Telegram bot that securely stores files and generates private access links.",
+  "repository": "https://github.com/ps-updates/PS-LinkVault.git",
+  "keywords": [
+    "telegram", 
+    "bot", 
+    "python", 
+    "file-storage", 
+    "link-vault"
+  ],
+
+  "env": {
+    "API_ID": {
+      "description": "Your Telegram API ID (from https://my.telegram.org)",
+      "required": true
+    },
+    "API_HASH": {
+      "description": "Your Telegram API Hash (from https://my.telegram.org)",
+      "required": true
+    },
+    "BOT_TOKEN": {
+      "description": "Your Telegram Bot Token from @BotFather",
+      "required": true
+    },
+    "CHANNEL_ID": {
+      "description": "The private channel ID used to store files (must start with -100)",
+      "required": true
+    },
+    "OWNER_ID": {
+      "description": "Your Telegram user ID (bot owner)",
+      "required": true
+    },
+    "DATABASE_URL": {
+      "description": "Your MongoDB or Postgres connection URL",
+      "required": true
+    },
+    "DATABASE_NAME": {
+      "description": "Database name (optional, default: Cluster0)",
+      "value": "Cluster0"
+    },
+    "FORCE_SUB_CHANNEL": {
+      "description": "Channel ID(s) users must join before using the bot (optional, space-separated)"
+    },
+    "JOIN_REQUEST_ENABLED": {
+      "description": "Enable join request (True/False)",
+      "value": "False"
+    },
+    "START_PIC": {
+      "description": "URL of a start image (optional)"
+    },
+    "START_MESSAGE": {
+      "description": "Custom start message (supports {mention})",
+      "value": "👋 Hello {mention},\n\nThis bot helps you store private files securely and share via access links."
+    },
+    "FORCE_SUB_MESSAGE": {
+      "description": "Message shown when user must join a channel",
+      "value": "👋 Hello {mention},\n\n<b>You need to join our updates channel before using this bot.</b>"
+    },
+    "CUSTOM_CAPTION": {
+      "description": "Optional custom caption for sent files"
+    },
+    "ADMINS": {
+      "description": "Space-separated Telegram user IDs with admin access"
+    },
+    "PROTECT_CONTENT": {
+      "description": "Protect sent media (True/False)",
+      "value": "False"
+    },
+    "DISABLE_CHANNEL_BUTTON": {
+      "description": "Disable channel link buttons (True/False)",
+      "value": "False"
+    },
+    "AUTO_DELETE_TIME": {
+      "description": "Auto delete time in seconds (0 = disabled)",
+      "value": "0"
+    },
+    "AUTO_DELETE_MSG": {
+      "description": "Message shown before auto deletion",
+      "value": "This file will be automatically deleted in {time}."
+    },
+    "AUTO_DEL_SUCCESS_MSG": {
+      "description": "Message shown after auto deletion",
+      "value": "✅ File deleted successfully."
+    },
+    "VERIFY_MODE": {
+      "description": "Enable link verification via shortlink (True/False)",
+      "value": "True"
+    },
+    "SHORTLINK_API": {
+      "description": "Shortlink API key (optional)"
+    },
+    "SHORTLINK_URL": {
+      "description": "Shortlink base URL (optional)"
+    },
+    "TOKEN_EXPIRE": {
+      "description": "Token expiry time in seconds (default 21600 = 6 hours)",
+      "value": "21600"
+    },
+    "TUTORIAL": {
+      "description": "Tutorial link for using the bot",
+      "value": "https://t.me/shareus_open_tutorial/12"
+    }
+  },
+
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  }
+}
