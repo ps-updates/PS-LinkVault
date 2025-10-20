@@ -29,7 +29,7 @@ Deploy on your favorite cloud platform:
 
 [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/ps-updates/PS-LinkVault&branch=main&name=ps-linkvault)
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ps-updates/PS-LinkVault)
 
 ---
 
