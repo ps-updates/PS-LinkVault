@@ -14,7 +14,6 @@
 [Features](#-features) • [Deploy](#-quick-deploy) • [Setup](#-setup--configuration) • [Commands](#-bot-commands) • [Support](#-support--community)
 </div>
 
----
 
 ## 📖 Overview
 
