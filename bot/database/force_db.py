@@ -102,6 +102,15 @@ class ForceChannelDB:
     async def get_all_channels(self):
         return await self.col.find({}).sort("created_at", 1).to_list(None)
 
+    
+    async def get_all_ids(self):
+        """
+        Returns list of channel_id.
+        """
+        cursor = self.col.find({}, {"channel_id": 1})
+        return [doc["channel_id"] for doc in await cursor.to_list(None)]
+    
+
     # -------------------------------------------------------
     # EXISTS
     # -------------------------------------------------------
