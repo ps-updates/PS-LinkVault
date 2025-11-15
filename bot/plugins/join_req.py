@@ -1,3 +1,5 @@
+# Cleaned & Refactored by @Mak0912 (TG)
+
 from pyrogram import Client, filters, enums
 from pyrogram.types import ChatJoinRequest
 from bot.database import join_db

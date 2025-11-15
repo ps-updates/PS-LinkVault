@@ -8,7 +8,7 @@ from pyrogram.errors import FloodWait
 from info import Config
 from bot.utils import encode
 
-@Client.on_message(filters.private & filters.user(Config.ADMINS) & ~filters.command(['start','users','broadcast','batch','genlink','stats', 'token']))
+@Client.on_message(filters.private & filters.user(Config.ADMINS) & filters.media)
 async def channel_post(client: Client, message: Message):
     reply_text = await message.reply_text("Please Wait...!", quote = True)
     try:
