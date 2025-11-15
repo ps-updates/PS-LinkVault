@@ -40,7 +40,7 @@ class Bot(Client):
         self.log(__name__).info("Starting FSUB sync...")
             
         # ------------------------------------------------------------
-        # FSUB SYNC: Only add NEW channels, update links for all
+        # FSUB SYNC: Only add NEW channels; existing DB entries untouched
         # ------------------------------------------------------------
         db_ids = await force_db.get_all_ids()
 
@@ -56,7 +56,7 @@ class Bot(Client):
         new_channels = [cid for cid in config_ids if cid not in db_ids]
 
         # ------------------------------------------------------------
-        # 1) Handle NEW CHANNELS → Insert with mode = "fsub"
+        # Handle NEW CHANNELS → Insert with mode = "fsub"
         # ------------------------------------------------------------
         for cid in new_channels:
             try:
@@ -72,7 +72,7 @@ class Bot(Client):
 
                 await force_db.add_channel_full(
                     channel_id=cid,
-                    mode="fsub",   # NEW CHANNEL → fsub only
+                    mode="fsub",
                     invite_link_normal=normal_link,
                     invite_link_request=request_link
                 )
@@ -80,36 +80,7 @@ class Bot(Client):
                 self.log(__name__).info(f"[FSUB] Added NEW channel {cid}")
 
             except Exception as e:
-                self.log(__name__).warning(f"[FSUB] Failed to sync new channel {cid}: {e}")
-
-        # ------------------------------------------------------------
-        # 2) Handle EXISTING CHANNELS → Refresh links only
-        # ------------------------------------------------------------
-        for cid in db_ids:
-            try:
-                await self.get_chat_member(cid, "me")
-            except:
-                continue  # skip, bot not in channel
-
-            # Get existing DB entry (preserve mode)
-            entry = await force_db.get_channel(cid)
-            mode = entry.get("mode", "fsub")
-
-            try:
-                normal_link = await self.export_chat_invite_link(cid)
-                req = await self.create_chat_invite_link(cid, creates_join_request=True)
-                request_link = req.invite_link
-
-                # Update links only, DO NOT TOUCH MODE
-                await force_db.update_links(cid, normal_link, request_link)
-
-                self.log(__name__).info(
-                    f"[FSUB] Updated links for {cid} (mode preserved: {mode})"
-                )
-
-            except Exception as e:
-                self.log(__name__).warning(f"[FSUB] Failed updating links for {cid}: {e}")
-
+                self.log(__name__).warning(f"[FSUB] Failed syncing new channel {cid}: {e}")
 
         # ------------------------------------------------------------
         # Verify DB logging channel
