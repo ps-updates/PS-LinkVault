@@ -5,7 +5,7 @@ from pyrogram import Client
 from logger import LOGGER
 from info import Config
 from bot.utils import schedule_manager
-from bot.database import force_db
+from bot.database import force_db, join_db
 
 ascii_art = """
 ████████╗██╗░░██╗███████╗  ██████╗░░██████╗  ██████╗░░█████╗░████████╗░██████╗
@@ -31,57 +31,21 @@ class Bot(Client):
         
     async def start(self):
         await super().start()
+        
+        # 🔐 Initialize DB + request-mode cache
+        await force_db.initialize()
+        await join_db.initialize()
+        
         me = await self.get_me()
         self.username = me.username
         self.mention = me.mention
+        self.first_name = me.first_name
         self.uptime = datetime.now()
-        await force_db.initialize()
-        
-        self.log(__name__).info("Starting FSUB sync...")
+         
+        channels = await force_db.get_all_channels()
+        if not channels:
+            self.log(__name__).info("FSUB is currently disabled (no channels configured)")
             
-        # ------------------------------------------------------------
-        # FSUB SYNC: 
-        # ------------------------------------------------------------
-        db_ids = await force_db.get_all_ids()
-
-        # Convert config IDs to integers safely
-        config_ids = []
-        for raw in Config.FORCE_SUB_CHANNEL:
-            try:
-                config_ids.append(int(raw))
-            except:
-                self.log(__name__).warning(f"[FSUB] Invalid channel ID: {raw}")
-
-        # NEW channels = in config but not in DB
-        new_channels = [cid for cid in config_ids if cid not in db_ids]
-
-        # ------------------------------------------------------------
-        # Handle NEW CHANNELS → Insert with mode = "fsub"
-        # ------------------------------------------------------------
-        for cid in new_channels:
-            try:
-                await self.get_chat_member(cid, "me")
-            except Exception as e:
-                self.log(__name__).warning(f"[FSUB] Bot is not in {cid}: {e}")
-                continue
-
-            try:
-                normal_link = await self.export_chat_invite_link(cid)
-                req = await self.create_chat_invite_link(cid, creates_join_request=True)
-                request_link = req.invite_link
-
-                await force_db.add_channel_full(
-                    channel_id=cid,
-                    mode="fsub",
-                    invite_link_normal=normal_link,
-                    invite_link_request=request_link
-                )
-
-                self.log(__name__).info(f"[FSUB] Added NEW channel {cid}")
-
-            except Exception as e:
-                self.log(__name__).warning(f"[FSUB] Failed syncing new channel {cid}: {e}")
-
         # ------------------------------------------------------------
         # Verify DB logging channel
         # ------------------------------------------------------------
