@@ -40,7 +40,7 @@ class Bot(Client):
         self.log(__name__).info("Starting FSUB sync...")
             
         # ------------------------------------------------------------
-        # FSUB SYNC: Only add NEW channels; existing DB entries untouched
+        # FSUB SYNC: 
         # ------------------------------------------------------------
         db_ids = await force_db.get_all_ids()
 
