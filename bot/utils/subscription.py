@@ -1,10 +1,9 @@
-
 import asyncio
 import logging
 from pyrogram.enums import ChatMemberStatus
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from info import Config
-from bot.database import join_db, force_db
+from bot.database import force_db, join_db
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +12,18 @@ async def force_sub_required(client, message):
     user = message.from_user
     user_id = user.id
 
-    # 🛡 Admin bypass
+    # 🛡 Admin / Owner bypass
     if user_id in Config.ADMINS or user_id == Config.OWNER_ID:
         return True
 
     channels = await force_db.get_all_channels()
+
+    # 📴 FSUB OFF
+    if not channels:
+        return True
+
     must_block = False
-    keyboard_rows = []     # final reply keyboard
+    keyboard_rows = []
 
     valid_status = {
         ChatMemberStatus.MEMBER,
@@ -27,59 +31,55 @@ async def force_sub_required(client, message):
         ChatMemberStatus.OWNER
     }
 
-    async def check(ch):
+    async def check_channel(ch):
         nonlocal must_block, keyboard_rows
 
         ch_id = ch["channel_id"]
-        mode = ch["mode"] 
+        mode = ch["mode"]
         normal = ch.get("invite_link_normal")
-        req = ch.get("invite_link_request")
-
-        # active link based on mode
-        link = normal if mode == "fsub" else req
-        label = "🔒 Must Join" if mode == "fsub" else "📢 Must Join"
+        request = ch.get("invite_link_request")
 
         try:
             member = await client.get_chat_member(ch_id, user_id)
             if member.status in valid_status:
-                await join_db.add_join_req(user_id, ch_id)
-                return
-        except Exception as e:
-            logger.debug(f"User {user_id} not in channel {ch_id}: {e}")
+                return  # ✅ joined
+        except:
+            pass
 
-        # ❌ User NOT joined
+        # 🔹 REQUEST MODE CASE
+        if mode == "request":
+            requested = await join_db.has_joined_channel(user_id, ch_id)
+            if requested:
+                return  # ✅ requested → allow
+
+        # ❌ BLOCK
         must_block = True
-        link = link or "https://t.me"     # fallback
+        link = normal if mode == "fsub" else request
+        label = "🔒 Join Channel" if mode == "fsub" else "📢 Request to Join"
 
-        # add URL button manually
         keyboard_rows.append([
-            InlineKeyboardButton(label, url=link)
+            InlineKeyboardButton(label, url=link or "https://t.me")
         ])
 
-    # run all checks concurrently
-    await asyncio.gather(*(check(ch) for ch in channels))
+    await asyncio.gather(*(check_channel(ch) for ch in channels))
 
-    # ✅ all channels joined
     if not must_block:
         return True
 
-    # 🔄 Add "I Joined" retry button
+    # 🔄 Retry button
     try:
         payload = message.command[1]
         retry_url = f"https://t.me/{client.username}?start={payload}"
 
         keyboard_rows.append([
-            InlineKeyboardButton("🔄 I Joined, Check Again", url=retry_url)
+            InlineKeyboardButton("🔄 I Joined / Requested", url=retry_url)
         ])
     except:
         pass
 
-    # final manual keyboard
-    keyboard = InlineKeyboardMarkup(keyboard_rows)
-
     await message.reply(
-        "**🚨 You must join all required channels to use this bot.**",
-        reply_markup=keyboard,
+        "**🚨 You must join/request all required channels to use this bot.**",
+        reply_markup=InlineKeyboardMarkup(keyboard_rows),
         disable_web_page_preview=True
     )
 
