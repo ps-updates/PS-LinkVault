@@ -1,13 +1,12 @@
 name: Docker Build & Push (GHCR)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
-    if: github.repository == 'ps-updates/PS-LinkVault'
+    # Run ONLY on the official upstream repo
+    if: github.repository_owner == 'ps-updates' && github.repository == 'ps-updates/PS-LinkVault'
     runs-on: ubuntu-latest
 
     permissions:
@@ -24,7 +23,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Build & Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
