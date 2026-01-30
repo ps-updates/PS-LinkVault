@@ -1,0 +1,23 @@
+# Git / meta
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Env / secrets
+.env
+.env.*
+*.session
+
+# Editors
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Unused
+docker-compose.yml
