@@ -29,15 +29,13 @@ async def get_valid_post(client: Client, user_id: int, prompt_text: str) -> int:
             return msg_id
 
         await response.reply(
-            "❌ This message is not from the DB Channel or the link is invalid.",
-            quote=True
+            "❌ This message is not from the DB Channel or the link is invalid."
         )
         attempts += 1
 
     await client.send_message(
         chat_id=user_id,
-        text="⛔️ You've reached the maximum number of attempts. Please try again later.",
-        quote=True
+        text="⛔️ You've reached the maximum number of attempts. Please try again later."
     )
     return 0
 
@@ -62,7 +60,6 @@ async def batch_link_generator(client: Client, message: Message):
     button = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={full_link}')]])
     await message.reply_text(
         f"<b>✅ Batch Link Generated</b>\n\n{full_link}",
-        quote=True,
         reply_markup=button 
     )
 
@@ -82,6 +79,5 @@ async def single_link_generator(client: Client, message: Message):
 
     await message.reply_text(
         f"<b>✅ Direct Link Generated</b>\n\n{full_link}",
-        quote=True,
         reply_markup=button
     )

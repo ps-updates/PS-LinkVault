@@ -2,7 +2,7 @@
 
 import asyncio
 from pyrogram import filters, Client
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from pyrogram.errors import FloodWait
 
 from info import Config
@@ -27,7 +27,11 @@ async def channel_post(client: Client, message: Message):
 
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={link}')]])
 
-    await reply_text.edit(f"<b>Here is your link</b>\n\n{link}", reply_markup=reply_markup, disable_web_page_preview = True)
+    await reply_text.edit(
+        f"<b>Here is your link</b>\n\n{link}", 
+        reply_markup=reply_markup, 
+        link_preview_options=LinkPreviewOptions(is_disabled=True)
+    )
 
     if not Config.DISABLE_CHANNEL_BUTTON:
         try:

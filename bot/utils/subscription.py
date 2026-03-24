@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from pyrogram.enums import ChatMemberStatus
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from info import Config
 from bot.database import force_db, join_db
 
@@ -80,7 +80,7 @@ async def force_sub_required(client, message):
     await message.reply(
         "**🚨 You must join/request all required channels to use this bot.**",
         reply_markup=InlineKeyboardMarkup(keyboard_rows),
-        disable_web_page_preview=True
+        link_preview_options=LinkPreviewOptions(is_disabled=True)
     )
 
     return False
