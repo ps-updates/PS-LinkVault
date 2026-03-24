@@ -1,6 +1,7 @@
 import uvloop
 import asyncio
 from pyrogram import idle
+import pyromod.listen
 from bot import Bot
 
 uvloop.install()
