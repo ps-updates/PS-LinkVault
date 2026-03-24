@@ -24,8 +24,9 @@ async def about_callback(client, query: CallbackQuery):
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton(
                 text="🔒 Close", 
-                callback_data="close"),
+                callback_data="close",
                 style=ButtonStyle.DANGER
+            )
                 ]
         ])
     )
