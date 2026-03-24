@@ -1,9 +1,9 @@
 # Cleaned & Refactored by @Mak0912 (TG)
 
-from pyrogram import Client, filters
-from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram import Client, filters, __version__
+from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from info import Config
-from pyrogram import __version__
+from pyrogram.enums import ButtonStyle
 
 @Client.on_callback_query(filters.regex("^about$"))
 async def about_callback(client, query: CallbackQuery):
@@ -20,9 +20,13 @@ async def about_callback(client, query: CallbackQuery):
 """
     await query.message.edit_text(
         text=text,
-        disable_web_page_preview=True,
+        link_preview_options=LinkPreviewOptions(is_disabled=True),
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔒 Close", callback_data="close")]
+            [InlineKeyboardButton(
+                text="🔒 Close", 
+                callback_data="close"),
+                style=ButtonStyle.DANGER
+                ]
         ])
     )
 
