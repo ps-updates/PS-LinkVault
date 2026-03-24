@@ -3,7 +3,7 @@
 
 import asyncio
 from pyrogram import Client, filters
-from pyrogram.enums import ParseMode
+from pyrogram.enums import ParseMode, ButtonStyle
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from pyrogram.errors import FloodWait
 
@@ -125,8 +125,8 @@ async def start_handler(client: Client, message: Message):
         # Start Message / No Params
         buttons = InlineKeyboardMarkup([
             [
-                InlineKeyboardButton("😊 About Me", callback_data="about"),
-                InlineKeyboardButton("🔒 Close", callback_data="close")
+                InlineKeyboardButton(text="😊 About Me", callback_data="about", style=ButtonStyle.PRIMARY),
+                InlineKeyboardButton("🔒 Close", callback_data="close", style=ButtonStyle.DANGER)
             ]
         ])
         caption = Config.START_MSG.format(

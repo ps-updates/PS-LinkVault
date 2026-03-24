@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from pyrogram.enums import ChatMemberStatus
+from pyrogram.enums import ChatMemberStatus, ButtonStyle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from info import Config
 from bot.database import force_db, join_db
@@ -42,23 +42,29 @@ async def force_sub_required(client, message):
         try:
             member = await client.get_chat_member(ch_id, user_id)
             if member.status in valid_status:
-                return  # ✅ joined
+                return  # ✅ already joined
         except:
             pass
 
-        # 🔹 REQUEST MODE CASE
+        # 🔹 REQUEST MODE
         if mode == "request":
             requested = await join_db.has_joined_channel(user_id, ch_id)
             if requested:
-                return  # ✅ requested → allow
+                return  # ✅ already requested
 
-        # ❌ BLOCK
+        # ❌ BLOCK USER
         must_block = True
         link = normal if mode == "fsub" else request
-        label = "🔒 Join Channel" if mode == "fsub" else "📢 Request to Join"
+
+        if mode == "fsub":
+            label = "🔒 Join Channel"
+            style = ButtonStyle.PRIMARY
+        else:
+            label = "📢 Request Access"
+            style = ButtonStyle.SUCCESS
 
         keyboard_rows.append([
-            InlineKeyboardButton(label, url=link or "https://t.me")
+            InlineKeyboardButton(label, url=link or "https://t.me", style=style)
         ])
 
     await asyncio.gather(*(check_channel(ch) for ch in channels))
@@ -66,19 +72,28 @@ async def force_sub_required(client, message):
     if not must_block:
         return True
 
-    # 🔄 Retry button
+    # 🔄 Retry Button
     try:
         payload = message.command[1]
         retry_url = f"https://t.me/{client.username}?start={payload}"
 
         keyboard_rows.append([
-            InlineKeyboardButton("🔄 I Joined / Requested", url=retry_url)
+            InlineKeyboardButton(
+                "🔄 I Joined / Continue",
+                url=retry_url,
+                style=ButtonStyle.SUCCESS
+            )
         ])
     except:
         pass
 
+    # 💬 PREMIUM MESSAGE UI
     await message.reply(
-        "**🚨 You must join/request all required channels to use this bot.**",
+        "<b>🚨 Access Restricted</b>\n\n"
+        "🔐 To use this bot, you must complete the required steps below.\n\n"
+        "📌 Join or request access to all channels,\n"
+        "then click <b>Continue</b>.\n\n"
+        "👇 Follow the buttons below:",
         reply_markup=InlineKeyboardMarkup(keyboard_rows),
         link_preview_options=LinkPreviewOptions(is_disabled=True)
     )

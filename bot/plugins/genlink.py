@@ -1,18 +1,21 @@
-# Cleaned & Refactored by @Mak0912 (TG)
+# Cleaned & Premium UI Version
 
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.enums import ButtonStyle
 from info import Config
 from bot.utils import encode, get_message_id
 
 MAX_ATTEMPTS = 3 
 
+
+# -----------------------------------------------------------
+# 🔁 INPUT HANDLER
+# -----------------------------------------------------------
+
 async def get_valid_post(client: Client, user_id: int, prompt_text: str) -> int:
-    """
-    Prompts user to forward a message or provide a link from the DB Channel,
-    and retries until MAX_ATTEMPTS is reached.
-    """
     attempts = 0
+
     while attempts < MAX_ATTEMPTS:
         try:
             response = await client.ask(
@@ -29,22 +32,35 @@ async def get_valid_post(client: Client, user_id: int, prompt_text: str) -> int:
             return msg_id
 
         await response.reply(
-            "❌ This message is not from the DB Channel or the link is invalid."
+            "❌ <b>Invalid message!</b>\n"
+            "Make sure it's from DB Channel or valid link."
         )
         attempts += 1
 
     await client.send_message(
         chat_id=user_id,
-        text="⛔️ You've reached the maximum number of attempts. Please try again later."
+        text="⛔️ <b>Maximum attempts reached!</b>\nTry again later."
     )
     return 0
+
+
+# -----------------------------------------------------------
+# 🔗 BATCH LINK GENERATOR
+# -----------------------------------------------------------
 
 @Client.on_message(filters.private & filters.user(Config.ADMINS) & filters.command("batch"))
 async def batch_link_generator(client: Client, message: Message):
     user_id = message.from_user.id
 
-    start_prompt = "📥 Forward the *first* message from the DB Channel (or send the link):"
-    end_prompt = "📤 Forward the *last* message from the DB Channel (or send the link):"
+    start_prompt = (
+        "📥 <b>Step 1:</b>\n"
+        "Send the <b>FIRST</b> message or link"
+    )
+
+    end_prompt = (
+        "📤 <b>Step 2:</b>\n"
+        "Send the <b>LAST</b> message or link"
+    )
 
     first_id = await get_valid_post(client, user_id, start_prompt)
     if not first_id:
@@ -57,17 +73,36 @@ async def batch_link_generator(client: Client, message: Message):
     encoded = encode(f"get-{first_id * abs(client.db_channel.id)}-{last_id * abs(client.db_channel.id)}")
     full_link = f"https://t.me/{client.username}?start={encoded}"
 
-    button = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={full_link}')]])
+    button = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🔗 Open Link", url=full_link, style=ButtonStyle.PRIMARY)
+        ],
+        [
+            InlineKeyboardButton("🔁 Share", url=f'https://telegram.me/share/url?url={full_link}', style=ButtonStyle.SUCCESS)
+        ]
+    ])
+
     await message.reply_text(
-        f"<b>✅ Batch Link Generated</b>\n\n{full_link}",
-        reply_markup=button 
+        f"<b>✅ Batch Link Generated</b>\n\n"
+        f"🔗 <code>{full_link}</code>\n\n"
+        f"📌 Use buttons below to open or share.",
+        reply_markup=button
     )
+
+
+# -----------------------------------------------------------
+# 🔗 SINGLE LINK GENERATOR
+# -----------------------------------------------------------
 
 @Client.on_message(filters.private & filters.user(Config.ADMINS) & filters.command("genlink"))
 async def single_link_generator(client: Client, message: Message):
     user_id = message.from_user.id
 
-    prompt = "📩 Forward the message from the DB Channel (or send the link):"
+    prompt = (
+        "📩 <b>Send Message</b>\n"
+        "Forward from DB Channel or send link"
+    )
+
     msg_id = await get_valid_post(client, user_id, prompt)
     if not msg_id:
         return
@@ -75,9 +110,18 @@ async def single_link_generator(client: Client, message: Message):
     encoded = encode(f"get-{msg_id * abs(client.db_channel.id)}")
     full_link = f"https://t.me/{client.username}?start={encoded}"
 
-    button = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={full_link}')]])
+    button = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🔗 Open Link", url=full_link, style=ButtonStyle.PRIMARY)
+        ],
+        [
+            InlineKeyboardButton("🔁 Share", url=f'https://telegram.me/share/url?url={full_link}', style=ButtonStyle.SUCCESS)
+        ]
+    ])
 
     await message.reply_text(
-        f"<b>✅ Direct Link Generated</b>\n\n{full_link}",
+        f"<b>✅ Direct Link Generated</b>\n\n"
+        f"🔗 <code>{full_link}</code>\n\n"
+        f"📌 Use buttons below to open or share.",
         reply_markup=button
     )
