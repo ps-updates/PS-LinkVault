@@ -1,7 +1,6 @@
 git+https://github.com/ps-updates/kurigram-fork.git@pyromod
 TgCrypto
 python-dotenv
-pyromod==1.5
 motor
 apscheduler
 dnspython
