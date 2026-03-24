@@ -2,11 +2,16 @@ name: Docker Build & Push (GHCR)
 
 on:
   workflow_dispatch:
+    branches:
+      - main   # Only allow manual trigger from main
 
 jobs:
   build:
-    # Run ONLY on the official upstream repo
-    if: github.repository_owner == 'ps-updates' && github.repository == 'ps-updates/PS-LinkVault'
+    # Run ONLY on upstream repo AND main branch
+    if: github.repository_owner == 'ps-updates' &&
+        github.repository == 'ps-updates/PS-LinkVault' &&
+        github.ref == 'refs/heads/main'
+
     runs-on: ubuntu-latest
 
     permissions:
