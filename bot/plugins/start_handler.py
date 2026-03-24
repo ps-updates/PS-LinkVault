@@ -4,9 +4,8 @@
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from pyrogram.errors import FloodWait
-
 from info import Config
 from bot.utils import force_sub_required, decode, get_messages, get_readable_time, schedule_manager
 from bot.database import add_user, present_user, is_verified, validate_token_and_verify
@@ -65,7 +64,7 @@ async def start_handler(client: Client, message: Message):
             if not await is_verified(user_id):
                 return await message.reply_text(
                     f"🔐 You're not verified!\nPlease verify yourself first using /token.",
-                    disable_web_page_preview=True
+                    link_preview_options=LinkPreviewOptions(is_disabled=True)
                 )
 
         wait_msg = await message.reply("Processing... Please wait.")
@@ -138,6 +137,14 @@ async def start_handler(client: Client, message: Message):
         )
 
         if Config.START_PIC:
-            await message.reply_photo(photo=Config.START_PIC, caption=caption, reply_markup=buttons, quote=True)
+            await message.reply_photo(
+                photo=Config.START_PIC, 
+                caption=caption, 
+                reply_markup=buttons
+            )
         else:
-            await message.reply_text(text=caption, reply_markup=buttons, disable_web_page_preview=True, quote=True)
+            await message.reply_text(
+                text=caption, 
+                reply_markup=buttons, 
+                link_preview_options=LinkPreviewOptions(is_disabled=True)
+            )

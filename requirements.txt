@@ -1,4 +1,4 @@
-pyrofork==2.3.45
+git+https://github.com/ps-updates/kurigram-fork
 TgCrypto
 python-dotenv
 motor
