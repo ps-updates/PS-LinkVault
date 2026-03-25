@@ -1,4 +1,4 @@
-git+https://github.com/ps-updates/pyrofork.git@master
+git+https://github.com/ps-updates/pyrofork.git@dev
 TgCrypto
 python-dotenv
 motor
