@@ -61,7 +61,7 @@ async def start_handler(client: Client, message: Message):
             return
 
         # ✅ Check verification only if required
-        if Config.VERIFY_MODE and (user_id not in Config.ADMINS or user_id != Config.OWNER_ID):
+        if Config.VERIFY_MODE and user_id not in Config.ADMINS:
             if not await is_verified(user_id):
                 return await message.reply_text(
                     f"🔐 You're not verified!\nPlease verify yourself first using /token.",

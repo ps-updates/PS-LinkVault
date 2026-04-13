@@ -1,9 +1,12 @@
-import uvloop
 import asyncio
+import sys
 from pyrogram import idle
 from bot import Bot
 
-uvloop.install()
+if sys.platform != "win32":
+    import uvloop
+
+    uvloop.install()
 
 async def main():
     app = Bot()

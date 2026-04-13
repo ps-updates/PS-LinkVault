@@ -1,7 +1,7 @@
 git+https://github.com/ps-updates/pyrofork.git@dev
 TgCrypto
 python-dotenv
-motor
+pymongo>=4.11,<5
 apscheduler
 dnspython
 aiohttp

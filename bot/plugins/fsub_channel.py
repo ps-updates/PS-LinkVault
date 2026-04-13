@@ -9,6 +9,7 @@ from pyrogram.errors import UserNotParticipant
 from info import Config
 from bot.database.force_db import force_db
 
+_FSUB_ADMIN = filters.user(Config.ADMINS)
 
 # -----------------------------------------------------------
 # UTILITY
@@ -151,14 +152,14 @@ async def panel_entry(client, message):
     await message.reply("**🛠 FSUB Dashboard**", reply_markup=panel_keyboard())
 
 
-@Client.on_callback_query(filters.regex("^fsub_setting$"))
+@Client.on_callback_query(_FSUB_ADMIN & filters.regex("^fsub_setting$"))
 async def back_panel(client, query):
     await safe_edit(query.message, "**🛠 FSUB Dashboard**", panel_keyboard())
 
 
 # ---------------- LIST ----------------
 
-@Client.on_callback_query(filters.regex(r"^list:(\d+)$"))
+@Client.on_callback_query(_FSUB_ADMIN & filters.regex(r"^list:(\d+)$"))
 async def list_channels(client, query):
     page = int(query.matches[0].group(1))
     channels = await force_db.get_all_channels()
@@ -192,7 +193,7 @@ async def list_channels(client, query):
 
 # ---------------- MANAGE ----------------
 
-@Client.on_callback_query(filters.regex(r"^manage:(-?\d+)$"))
+@Client.on_callback_query(_FSUB_ADMIN & filters.regex(r"^manage:(-?\d+)$"))
 async def manage_channel(client, query):
     ch_id = int(query.matches[0].group(1))
     ch = await force_db.get_channel(ch_id)
@@ -211,10 +212,13 @@ async def manage_channel(client, query):
 
 # ---------------- TOGGLE ----------------
 
-@Client.on_callback_query(filters.regex(r"^toggle:(-?\d+)$"))
+@Client.on_callback_query(_FSUB_ADMIN & filters.regex(r"^toggle:(-?\d+)$"))
 async def toggle_mode(client, query):
     ch_id = int(query.matches[0].group(1))
     ch = await force_db.get_channel(ch_id)
+
+    if not ch:
+        return await query.answer("Channel not found!", show_alert=True)
 
     new_mode = "request" if ch["mode"] == "fsub" else "fsub"
     await force_db.update_channel_mode(ch_id, new_mode)
@@ -231,15 +235,22 @@ async def toggle_mode(client, query):
 
 # ---------------- REGEN ----------------
 
-@Client.on_callback_query(filters.regex(r"^regen:(-?\d+)$"))
+@Client.on_callback_query(_FSUB_ADMIN & filters.regex(r"^regen:(-?\d+)$"))
 async def regenerate_links(client, query):
     ch_id = int(query.matches[0].group(1))
+
+    ch = await force_db.get_channel(ch_id)
+    if not ch:
+        return await query.answer("Channel not found!", show_alert=True)
 
     normal, req = await create_links(client, ch_id)
     await force_db.update_links(ch_id, normal, req)
 
     ch = await force_db.get_channel(ch_id)
     all_channels = await force_db.get_all_channels()
+
+    if not ch:
+        return await query.answer("Channel not found!", show_alert=True)
 
     await safe_edit(
         query.message,
@@ -250,7 +261,7 @@ async def regenerate_links(client, query):
 
 # ---------------- REMOVE ----------------
 
-@Client.on_callback_query(filters.regex(r"^remove:(-?\d+)$"))
+@Client.on_callback_query(_FSUB_ADMIN & filters.regex(r"^remove:(-?\d+)$"))
 async def remove_channel(client, query):
     ch_id = int(query.matches[0].group(1))
     await force_db.delete_channel(ch_id)
@@ -261,7 +272,7 @@ async def remove_channel(client, query):
 
 # ---------------- ADD (AUTO MANAGE PANEL) ----------------
 
-@Client.on_callback_query(filters.regex("^add_channel$"))
+@Client.on_callback_query(_FSUB_ADMIN & filters.regex("^add_channel$"))
 async def add_channel(client, query):
     admin_id = query.from_user.id
 

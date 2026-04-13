@@ -75,7 +75,7 @@ async def new_post(client: Client, message: Message):
 
     converted_id = message.id * abs(client.db_channel.id)
     string = f"get-{converted_id}"
-    base64_string = await encode(string)
+    base64_string = encode(string)
     link = f"https://t.me/{client.username}?start={base64_string}"
 
     # 🔥 SAME PREMIUM BUTTONS

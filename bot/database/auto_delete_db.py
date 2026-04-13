@@ -23,4 +23,4 @@ async def delete_saved_task(task_id: str):
     await collection.delete_one({"_id": task_id})
 
 async def get_all_delete_tasks() -> List[dict]:
-    return await collection.find({}).to_list(length=None)
+    return await collection.find({}).to_list(None)
